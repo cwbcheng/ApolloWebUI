@@ -1,0 +1,49 @@
+﻿@using ApolloWebUI.Model;
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+
+@inject IModalService Modal;
+
+<tr>
+    <td>@Content.Key</td>
+    <td>@Content.Value</td>
+    <td>@Content.Comment</td>
+    <td>@Content.DataChangeLastModifiedBy</td>
+    <td>@Content.DataChangeLastModifiedTime</td>
+    <td>@Content.DataChangeCreatedBy</td>
+    <td>@Content.DataChangeCreatedTime</td>
+    <td>
+        <button @onclick="ShowModal" class="btn btn-primary">Show Modal</button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public NamespaceItem Content { get; set; }
+
+    void ShowModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("FormId", 11);
+
+        Modal.OnClose += ModalClosed;
+        Modal.Show("Sign Up Form", typeof(MyModal), parameters);
+    }
+
+    void ModalClosed(ModalResult modalResult)
+    {
+        Console.WriteLine("Modal has closed");
+
+        if (modalResult.Cancelled)
+        {
+            Console.WriteLine("Modal was Cancelled");
+        }
+        else
+        {
+            Console.WriteLine(modalResult.Data.ToString());
+        }
+
+        Modal.OnClose -= ModalClosed;
+    }
+}

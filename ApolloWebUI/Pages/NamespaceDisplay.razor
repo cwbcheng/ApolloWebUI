@@ -3,8 +3,12 @@
 @using Model;
 @using System.Runtime.Caching;
 @using Microsoft.Extensions.Configuration;
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
 
 @inject IConfiguration Configuration;
+@inject IModalService  Modal;
 <h3>@SpaceName</h3>
 
 @if (Content == null)
@@ -28,7 +32,7 @@ else
         <tbody>
             @foreach (var item in Content.Items.OrderBy(i => i.Key.ToLower()))
             {
-                <NamespaceModelComponent Content="item" />
+                <NamespaceItemComponent Content="item" />
             }
         </tbody>
     </table>
