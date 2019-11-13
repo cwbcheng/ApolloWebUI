@@ -8,3 +8,5 @@ ApolloWebUI/obj
 .vs/ApolloWebUI/v16/Server/sqlite3/storage.ide
 .vs/ApolloWebUI/v16/Server/sqlite3/storage.ide-shm
 .vs/ApolloWebUI/v16/Server/sqlite3/storage.ide-wal
+ApolloWebUI/appsettings.json
+ApolloWebUI/appsettings.Development.json
