@@ -1,0 +1,74 @@
+﻿@page "/namespaceDisplay/{spaceName}"
+@using System.Text.Json;
+@using Model;
+@using System.Runtime.Caching;
+@using Microsoft.Extensions.Configuration;
+
+@inject IConfiguration Configuration;
+<h3>@SpaceName</h3>
+
+@if (Content == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>键</th>
+                <th>值</th>
+                <th>注释</th>
+                <th>最近修改人</th>
+                <th>最近修改时间</th>
+                <th>创建人</th>
+                <th>创建时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Content.Items.OrderBy(i => i.Key.ToLower()))
+            {
+                <NamespaceModelComponent Content="item" />
+            }
+        </tbody>
+    </table>
+}
+@Message
+
+@code {
+    [Parameter]
+    public string SpaceName { get; set; }
+
+    public NamespaceModel Content { get; set; }
+
+    private static HttpClient _httpClient = new HttpClient();
+
+    private string Message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var url = Configuration.GetValue<string>("GetApplicationUrl");
+            var key = Configuration.GetValue<string>("ApolloKey");
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(key);
+            var response = await _httpClient.GetAsync(url);
+            var result = await response.Content.ReadAsStringAsync();
+            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            };
+            jsonSerializerOptions.Converters.Add(new DatetimeJsonConverter());
+            Content = JsonSerializer.Deserialize<NamespaceModel>(result, jsonSerializerOptions);
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    private void DisplayChangeForm()
+    {
+        Message = "aa";
+    }
+}

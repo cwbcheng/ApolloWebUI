@@ -1,0 +1,10 @@
+
+ApolloWebUI/.vs
+ApolloWebUI/bin
+ApolloWebUI/obj
+.vs/ApolloWebUI/
+.vs/ApolloWebUI/DesignTimeBuild/.dtbcache
+.vs/ApolloWebUI/v16/.suo
+.vs/ApolloWebUI/v16/Server/sqlite3/storage.ide
+.vs/ApolloWebUI/v16/Server/sqlite3/storage.ide-shm
+.vs/ApolloWebUI/v16/Server/sqlite3/storage.ide-wal
