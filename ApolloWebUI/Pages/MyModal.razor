@@ -2,26 +2,41 @@
 @using Blazored.Modal
 @using Blazored.Modal.Services
 @using Model
+@using ApolloWebUI.Data
 
 @inject IModalService ModalService
+@inject ApolloService Apollo
 
-@if (ShowForm)
+@if (Step == 0)
 {
     <div class="simple-form">
         <div class="form-group">
-            <label for="value">@Item.Key</label>
-            <input @bind="Item.Value" type="text" class="form-control" id="value" />
+            <label for="newValue">@Item.Key</label>
+            <input @bind="NewValue" type="text" class="form-control" id="newValue" />
         </div>
 
         <button @onclick="SubmitForm" class="btn btn-primary">Submit</button>
         <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
     </div>
 }
-else
+else if (Step == 1)
+{
+    <div class="alert alert-warning" role="alert">
+        <div>要将字段<p class="text-danger">@Item.Key</p>的值<p class="text-danger">@Item.Value</p>改为<p class="text-danger">@NewValue</p>吗？ <br /></div>
+        <button class="btn btn-primary" @onclick="@Confirm">确定</button>
+        <button class="btn btn-secondary" @onclick="@Cancel">取消</button>
+    </div>
+}
+else if (Step == 2)
 {
     <div class="alert alert-success" role="alert">
-        Thanks @FirstName @LastName, form  submitted successfully.<br />
-        <button class="btn btn-primary" @onclick="@Done">Done</button>
+        修改成功
+    </div>
+}
+else if (Step == 3)
+{
+    <div class="alert alert-warning" role="alert">
+        修改失败
     </div>
 }
 
@@ -30,18 +45,27 @@ else
     [CascadingParameter] ModalParameters Parameters { get; set; }
 
     bool ShowForm { get; set; } = true;
-    string FirstName { get; set; }
-    string LastName { get; set; }
+    int Step { get; set; } = 0;
     NamespaceItem Item { get; set; }
+    string NewValue { get; set; }
 
     protected override void OnInitialized()
     {
-        Item = Parameters.Get<NamespaceItem>("Item");
+        Item = Parameters.Get<NamespaceItem>
+    ("Item");
+        NewValue = Item.Value;
     }
 
     void SubmitForm()
     {
-        ShowForm = false;
+        if (NewValue == Item.Value)
+        {
+            return;
+        }
+        else
+        {
+            Step = 1;
+        }
     }
 
     void Done()
@@ -54,4 +78,23 @@ else
         ModalService.Close(ModalResult.Cancel());
     }
 
+    async Task Confirm()
+    {
+        if (await Apollo.Update(Item.Key, Item.Value))
+        {
+            if (await Apollo.Release())
+            {
+                Item.Value = NewValue;
+                Step = 2;
+            }
+            else
+            {
+                Step = 3;
+            }
+        }
+        else
+        {
+            Step = 3;
+        }
+    }
 }
