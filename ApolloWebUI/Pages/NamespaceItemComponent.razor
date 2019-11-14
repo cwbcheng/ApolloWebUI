@@ -5,7 +5,7 @@
 
 @inject IModalService Modal;
 
-<tr>
+<tr  @ondblclick="ShowModal">
     <td>@Content.Key</td>
     <td>@Content.Value</td>
     <td>@Content.Comment</td>
@@ -13,9 +13,6 @@
     <td>@Content.DataChangeLastModifiedTime</td>
     <td>@Content.DataChangeCreatedBy</td>
     <td>@Content.DataChangeCreatedTime</td>
-    <td>
-        <button @onclick="ShowModal" class="btn btn-primary">Show Modal</button>
-    </td>
 </tr>
 
 @code {
@@ -25,10 +22,10 @@
     void ShowModal()
     {
         var parameters = new ModalParameters();
-        parameters.Add("FormId", 11);
+        parameters.Add("Item", Content);
 
         Modal.OnClose += ModalClosed;
-        Modal.Show("Sign Up Form", typeof(MyModal), parameters);
+        Modal.Show("修改配置项", typeof(MyModal), parameters);
     }
 
     void ModalClosed(ModalResult modalResult)

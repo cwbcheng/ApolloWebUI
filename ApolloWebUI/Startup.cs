@@ -24,6 +24,7 @@ namespace ApolloWebUI
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddBlazoredModal();
+            services.AddSingleton<ApolloService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

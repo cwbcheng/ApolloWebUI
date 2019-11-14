@@ -1,14 +1,12 @@
 ﻿@page "/namespaceDisplay/{spaceName}"
-@using System.Text.Json;
 @using Model;
-@using System.Runtime.Caching;
 @using Microsoft.Extensions.Configuration;
-@using Blazored
-@using Blazored.Modal
 @using Blazored.Modal.Services
+@using ApolloWebUI.Data
 
 @inject IConfiguration Configuration;
 @inject IModalService  Modal;
+@inject ApolloService Apollo
 <h3>@SpaceName</h3>
 
 @if (Content == null)
@@ -53,18 +51,7 @@ else
     {
         try
         {
-            var url = Configuration.GetValue<string>("GetApplicationUrl");
-            var key = Configuration.GetValue<string>("ApolloKey");
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue(key);
-            var response = await _httpClient.GetAsync(url);
-            var result = await response.Content.ReadAsStringAsync();
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            };
-            jsonSerializerOptions.Converters.Add(new DatetimeJsonConverter());
-            Content = JsonSerializer.Deserialize<NamespaceModel>(result, jsonSerializerOptions);
+            Content = await Apollo.GetNamespanceAsync(SpaceName);
         }
         catch (Exception ex)
         {
