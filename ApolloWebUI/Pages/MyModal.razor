@@ -80,7 +80,7 @@ else if (Step == 3)
 
     async Task Confirm()
     {
-        if (await Apollo.Update(Item.Key, Item.Value))
+        if (await Apollo.Update(Item.Key, NewValue))
         {
             if (await Apollo.Release())
             {
