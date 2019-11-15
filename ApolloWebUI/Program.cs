@@ -15,7 +15,9 @@ namespace ApolloWebUI
                 .UseSystemd()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+                    .UseUrls("http://localhost:8000;https://localhost:8001")
+                    .UseStartup<Startup>();
                 });
     }
 }
