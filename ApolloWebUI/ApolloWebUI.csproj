@@ -10,4 +10,8 @@
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0-preview2.19523.17" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
 </Project>
