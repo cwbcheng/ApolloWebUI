@@ -11,4 +11,4 @@ ApolloWebUI/obj
 ApolloWebUI/appsettings.json
 ApolloWebUI/appsettings.Development.json
 ApolloWebUI/app.db
-ApolloWebUI/Migrations
+ApolloWebUI/app.db
