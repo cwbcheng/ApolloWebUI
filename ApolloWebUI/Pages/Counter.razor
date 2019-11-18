@@ -1,10 +1,18 @@
 ﻿@page "/counter"
 
-<h1>Counter</h1>
+<AuthorizeView>
+    <Authorized>
+        <h1>Counter</h1>
 
-<p>Current count: @currentCount</p>
+        <p>@Name Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+        <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    </Authorized>
+
+    <NotAuthorized>
+        Sorry you cannot see this.
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     int currentCount = 0;
@@ -12,5 +20,22 @@
     void IncrementCount()
     {
         currentCount++;
+    }
+}
+
+@code{
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; }
+
+    private string Name { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await authStateTask;
+            var user = authState.User;
+            Name = user.Identity.Name;
+        }
     }
 }
