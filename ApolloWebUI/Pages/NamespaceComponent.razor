@@ -1,0 +1,28 @@
+﻿@using Model;
+<table class="table">
+    <thead>
+        <tr>
+            <th>键</th>
+            <th>值</th>
+            <th>注释</th>
+            <th>最近修改人</th>
+            <th>最近修改时间</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Content.Items.OrderBy(i => i.Key.ToLower()))
+        {
+            <NamespaceItemComponent Content="item" />
+        }
+    </tbody>
+</table>
+
+@code
+{
+    [Parameter]
+    public NamespaceModel Content { get; set; }
+    [Parameter] 
+    public EventCallback<NamespaceModel> ContentChanged { get; set; }
+}

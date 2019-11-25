@@ -20,32 +20,14 @@ else
 {
     <div>
         <label class="text-primary">运行环境：</label>
-        <select @bind="Apollo.Environment">
+        <select @onchange="EnvironmentChanged">
             @foreach (var item in Enum.GetValues(typeof(ApolloEnvironmentEnum)))
             {
                 <option value="@item">@item.ToString()</option>
             }
         </select>
     </div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>键</th>
-                <th>值</th>
-                <th>注释</th>
-                <th>最近修改人</th>
-                <th>最近修改时间</th>
-                <th>创建人</th>
-                <th>创建时间</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Content.Items.OrderBy(i => i.Key.ToLower()))
-            {
-                <NamespaceItemComponent Content="item" />
-            }
-        </tbody>
-    </table>
+    <NamespaceComponent @bind-Content="@Content" />
 }
 @Message
 
@@ -59,6 +41,22 @@ else
 
     private string Message { get; set; }
 
+    private ApolloEnvironmentEnum ApolloEnvironment
+    {
+        get
+        {
+            return Apollo.Environment;
+        }
+        set
+        {
+            if (Apollo.Environment != value)
+            {
+                Apollo.Environment = value;
+                OnInitializedAsync();
+            }
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -69,5 +67,11 @@ else
         {
             Message = ex.Message;
         }
+    }
+
+    private async Task EnvironmentChanged(ChangeEventArgs changeEventArgs)
+    {
+        Apollo.Environment = (ApolloEnvironmentEnum)Enum.Parse(typeof(ApolloEnvironmentEnum), changeEventArgs.Value.ToString());
+        await OnInitializedAsync();
     }
 }
