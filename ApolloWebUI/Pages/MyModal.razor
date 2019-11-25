@@ -82,7 +82,6 @@ else if (Step == 3)
 
     async Task Confirm()
     {
-        var env = httpContextAccessor.HttpContext.Features.Get<ApolloEnvironmentEnum>();
         if (await Apollo.Update(Item.Key, NewValue))
         {
             if (await Apollo.Release())

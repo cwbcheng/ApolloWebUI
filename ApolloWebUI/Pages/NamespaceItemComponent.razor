@@ -5,7 +5,7 @@
 
 @inject IModalService Modal;
 
-<tr  @ondblclick="ShowModal">
+<tr @ondblclick="ShowModal">
     <td>@Content.Key</td>
     <td>@Content.Value</td>
     <td>@Content.Comment</td>
@@ -18,6 +18,8 @@
 @code {
     [Parameter]
     public NamespaceItem Content { get; set; }
+    [Parameter]
+    public EventCallback<NamespaceItem> ContentChanged { get; set; }
 
     void ShowModal()
     {
@@ -42,5 +44,6 @@
         }
 
         Modal.OnClose -= ModalClosed;
+        StateHasChanged();
     }
 }
