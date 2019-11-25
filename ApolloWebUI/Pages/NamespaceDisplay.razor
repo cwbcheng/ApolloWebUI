@@ -4,7 +4,9 @@
 @using Microsoft.Extensions.Configuration;
 @using Blazored.Modal.Services
 @using ApolloWebUI.Data
+@using Microsoft.AspNetCore.Http
 
+@inject IHttpContextAccessor httpContextAccessor
 @inject IConfiguration Configuration;
 @inject IModalService  Modal;
 @inject ApolloService Apollo
@@ -16,6 +18,15 @@
 }
 else
 {
+    <div>
+        <label class="text-primary">运行环境：</label>
+        <select @bind="Apollo.Environment">
+            @foreach (var item in Enum.GetValues(typeof(ApolloEnvironmentEnum)))
+            {
+                <option value="@item">@item.ToString()</option>
+            }
+        </select>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -56,11 +67,7 @@ else
         }
         catch (Exception ex)
         {
+            Message = ex.Message;
         }
-    }
-
-    private void DisplayChangeForm()
-    {
-        Message = "aa";
     }
 }

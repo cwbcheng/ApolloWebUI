@@ -30,7 +30,8 @@ namespace ApolloWebUI
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<AppDbContext>();
-            services.Configure<IdentityOptions>(options => {// √‹¬Î…Ë÷√options.Password.RequireDigit = false;
+            services.Configure<IdentityOptions>(options =>
+            {// √‹¬Î…Ë÷√options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
@@ -41,7 +42,8 @@ namespace ApolloWebUI
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             services.AddBlazoredModal();
-            services.AddSingleton<ApolloService>();
+            services.AddScoped<ApolloService>();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,7 +3,9 @@
 @using Blazored.Modal.Services
 @using Model
 @using ApolloWebUI.Data
+@using Microsoft.AspNetCore.Http
 
+@inject IHttpContextAccessor httpContextAccessor
 @inject IModalService ModalService
 @inject ApolloService Apollo
 
@@ -22,7 +24,7 @@
 else if (Step == 1)
 {
     <div class="alert alert-warning" role="alert">
-        <div>要将字段<p class="text-danger">@Item.Key</p>的值<p class="text-danger">@Item.Value</p>改为<p class="text-danger">@NewValue</p>吗？ <br /></div>
+        <div>当前阿波罗环境是<em class="text-danger">@Apollo.Environment</em>!要将字段<p class="text-danger">@Item.Key</p>的值<p class="text-danger">@Item.Value</p>改为<p class="text-danger">@NewValue</p>吗？ <br /></div>
         <button class="btn btn-primary" @onclick="@Confirm">确定</button>
         <button class="btn btn-secondary" @onclick="@Cancel">取消</button>
     </div>
@@ -51,7 +53,8 @@ else if (Step == 3)
 
     protected override void OnInitialized()
     {
-        Item = Parameters.Get<NamespaceItem>("Item");
+        Item = Parameters.Get<NamespaceItem>
+    ("Item");
         NewValue = Item.Value;
     }
 
@@ -79,6 +82,7 @@ else if (Step == 3)
 
     async Task Confirm()
     {
+        var env = httpContextAccessor.HttpContext.Features.Get<ApolloEnvironmentEnum>();
         if (await Apollo.Update(Item.Key, NewValue))
         {
             if (await Apollo.Release())
