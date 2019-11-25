@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using ApolloWebUI.Data;
 
 namespace ApolloWebUI
 {
@@ -7,7 +8,12 @@ namespace ApolloWebUI
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build()
+                .MigrateDbContext<AppDbContext>((context, services) =>
+                {
+                    new AppDbContextSeed().SeedAsync(context, services).Wait();
+                })
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
