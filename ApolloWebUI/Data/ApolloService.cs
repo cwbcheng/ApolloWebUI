@@ -44,7 +44,7 @@ namespace ApolloWebUI.Data
             string apolloDomain = Configuration.GetValue<string>("ApolloDomain");
             string appId = Configuration.GetValue<string>("ApolloAppId");
             var url = $"{apolloDomain}openapi/v1/envs/{Environment.ToString()}/apps/{appId}/clusters/default/namespaces/application/items/{key}";
-            var content = JsonSerializer.Serialize(new { key, value, comment = "a", dataChangeLastModifiedBy = "apollo" }, typeof(object), jsonSerializerOptions);
+            var content = JsonSerializer.Serialize(new { key, value, comment = $"{key}修改为{value}", dataChangeLastModifiedBy = "apollo" }, typeof(object), jsonSerializerOptions);
             StringContent stringContent = new StringContent(content, Encoding.UTF8, "application/json");
             var response = await httpClient.PutAsync(url, stringContent);
             if (response.IsSuccessStatusCode)
