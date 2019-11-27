@@ -1,0 +1,25 @@
+﻿@using Model;
+<g transform="translate(@x, @y)" style="opacity: 1;">
+    <rect height="42" ry="2" rx="2" y="-22" x="20" width="100%" fill="rgba(0,0,0,0)"></rect>
+    <text x="13" y="5" fill="#E54C17"></text>
+    <text class="node-text" x="35" y="-6" fill="#333" style="font-size: 11px;">@Request.Location</text>
+    <text class="node-text" x="35" y="12" fill="#ccc" style="font-size: 11px;">@Request.Method</text>
+    <circle r="3" stroke-width="2.5" style="cursor: pointer; stroke: rgb(110, 64, 170);"></circle>
+</g>
+
+@code
+{
+    int x, y;
+    [Parameter]
+    public int ListIndex { get; set; }
+    [Parameter]
+    public CallChainRequest Request { get; set; }
+    [Parameter]
+    public CallChainResponse Response { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var spans = (Request != null ? Request.SpanId : Response.SpanId).Split('.');
+        x = 12 * spans.Length;
+        y = 24 + 48 * (ListIndex + 1);
+    }
+}
