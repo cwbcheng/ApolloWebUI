@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ApolloWebUI
 {
@@ -37,6 +38,10 @@ namespace ApolloWebUI
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 1;
                 options.Password.RequiredUniqueChars = 1;// Ëø¶¨ÉèÖÃ
+            });
+            services.AddSignalR(e =>
+            {
+                e.MaximumReceiveMessageSize = 1024 * 1024 * 10;
             });
             services.AddRazorPages();
             services.AddServerSideBlazor();
@@ -67,7 +72,6 @@ namespace ApolloWebUI
 
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

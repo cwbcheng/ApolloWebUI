@@ -1,0 +1,60 @@
+﻿@page "/callChainParser"
+
+@using Blazored.Modal.Services
+@using System.Text.Json
+@using ApolloWebUI.Model
+@using ApolloWebUI.Components
+
+@inject IModalService  Modal;
+<div>
+    <textarea class="input-group-text" @bind="@InputString" name="InputString"></textarea>
+    <button type="submit" class="btn btn-primary" @onclick="Parse">解析</button>
+</div>
+@if (@ChainModel != null)
+{
+    <CallChainSvgComponent ChainModel="@ChainModel" />
+}
+<p class="text-danger">@Message</p>
+@code
+{
+    string InputString { get; set; }
+    CallChainModel ChainModel { get; set; }
+    List<string>
+    viewModel;
+    string Message { get; set; }
+
+    private void HandleSubmit()
+    {
+        Console.WriteLine("OnSubmit");
+    }
+
+    void Parse()
+    {
+        var o = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        try
+        {
+            var a = JsonSerializer.Deserialize<JsonElement>
+                (InputString);
+            var b = a.GetProperty("obj").GetString();
+            if (string.IsNullOrEmpty(b) == false)
+            {
+                ChainModel = JsonSerializer.Deserialize<CallChainModel>
+                    (b, o);
+            }
+            else
+            {
+                ChainModel = JsonSerializer.Deserialize<CallChainModel>
+                    (InputString, o);
+            }
+            Message = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Message = ex.Message;
+            Console.WriteLine(ex);
+        }
+    }
+}
