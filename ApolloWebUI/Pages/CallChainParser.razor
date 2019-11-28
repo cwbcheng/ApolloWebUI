@@ -7,7 +7,7 @@
 
 @inject IModalService  Modal;
 <div>
-    <textarea class="input-group-text" @bind="@InputString" name="InputString"></textarea>
+    <textarea class="form-control" style="width:100%" @bind="@InputString" name="InputString"></textarea>
     <button type="submit" class="btn btn-primary" @onclick="Parse">解析</button>
 </div>
 @if (@ChainModel != null)
