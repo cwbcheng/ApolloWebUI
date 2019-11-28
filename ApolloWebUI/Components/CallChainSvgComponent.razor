@@ -46,8 +46,8 @@
         {
             var b = ChainModel.Requests.Select(o => o.SpanId);
             var c = ChainModel.Responses.Select(o => o.SpanId);
-            viewModel = b.Union(c.ToArray(), new SpanIdComparer())
-                .OrderBy(o => o).ToList();
+            viewModel = b.Union(c.ToArray(), new SpanIdEqualityComparer())
+                .OrderBy(o => o, new SpanIdOrderComparer()).ToList();
         }
         catch (Exception ex)
         {

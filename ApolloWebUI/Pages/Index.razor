@@ -26,10 +26,6 @@
         try
         {
             chainModel = JsonSerializer.Deserialize<CallChainModel>(a, o);
-            var b = chainModel.Requests.Select(o => o.SpanId);
-            var c = chainModel.Responses.Select(o => o.SpanId);
-            viewModel = b.Union(c.ToArray(), new SpanIdComparer())
-                .OrderBy(o => o).ToList();
         }
         catch (Exception ex)
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ApolloWebUI.Model
 {
-    public class SpanIdComparer : IEqualityComparer<string>
+    public class SpanIdEqualityComparer : IEqualityComparer<string>
     {
         public bool Equals([AllowNull] string x, [AllowNull] string y)
         {
