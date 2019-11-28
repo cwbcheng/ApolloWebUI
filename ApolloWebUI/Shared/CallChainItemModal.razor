@@ -1,0 +1,51 @@
+﻿@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using Model
+@using ApolloWebUI.Data
+@using Microsoft.AspNetCore.Http
+
+@inject IModalService ModalService
+
+<div>
+    <ul class="list-group bg-light">
+        <li class="list-group-item">
+            <label>请求串</label>
+            <textarea class="form-control" style="width:100%" disabled>@Request.Request</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>请求时间</label>
+            <textarea class="form-control" style="width:100%" disabled>@Request.RequestTime.ToString("yyyy-MM-dd hh:mm:ss fff")</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>返回串</label>
+            <textarea class="form-control" style="width:100%" disabled>@Response?.Response</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>返回时间</label>
+            <textarea class="form-control" style="width:100%" disabled>@Response?.ResponseTime.ToString("yyyy-MM-dd hh:mm:ss fff")</textarea>
+        </li>
+    </ul>
+    <button class="btn btn-primary" @onclick="@Done">确定</button>
+</div>
+
+@code {
+
+    [CascadingParameter] ModalParameters Parameters { get; set; }
+
+    bool ShowForm { get; set; } = true;
+    int Step { get; set; } = 0;
+    string NewValue { get; set; }
+    CallChainRequest Request { get; set; }
+    CallChainResponse Response { get; set; }
+    protected override void OnInitialized()
+    {
+        Request = Parameters.Get<CallChainRequest>("request");
+        Response = Parameters.Get<CallChainResponse>("response");
+    }
+
+    void Done()
+    {
+        ModalService.Close(ModalResult.Ok(""));
+    }
+}
