@@ -4,7 +4,7 @@
 @using System.Text.Json
 @using ApolloWebUI.Model
 @using ApolloWebUI.Components
-
+@using System.Text;
 @inject IModalService  Modal;
 <div>
     <textarea class="form-control" style="width:100%" @bind="@InputString" name="InputString"></textarea>
@@ -38,11 +38,13 @@
         {
             var a = JsonSerializer.Deserialize<JsonElement>
                 (InputString);
-            var b = a.GetProperty("obj").GetString();
-            if (string.IsNullOrEmpty(b) == false)
+            ReadOnlySpan<char>
+                readOnlySpan = new ReadOnlySpan<char>
+                    ("obj".ToCharArray());
+            if (a.TryGetProperty(readOnlySpan, out var b))
             {
                 ChainModel = JsonSerializer.Deserialize<CallChainModel>
-                    (b, o);
+                    (b.GetString(), o);
             }
             else
             {
