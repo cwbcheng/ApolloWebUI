@@ -65,13 +65,13 @@
     string GetProductId()
     {
         object obj;
-        if (Response?.Response != null)
+        if (Request?.Request != null)
         {
-            obj = Response?.Response;
+            obj = Request?.Request;
         }
         else
         {
-            obj = Request?.Request;
+            obj = Response?.Response;
         }
 
         if (obj == null)
