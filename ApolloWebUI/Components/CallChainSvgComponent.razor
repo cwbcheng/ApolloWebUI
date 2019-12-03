@@ -38,6 +38,10 @@
     [Parameter]
     public CallChainModel ChainModel { get; set; }
 
+    
+    [Parameter] 
+    public EventCallback<CallChainModel> ChainModelChanged { get; set; }
+
     List<string> viewModel;
 
     protected override async Task OnInitializedAsync()

@@ -12,7 +12,7 @@
 </div>
 @if (@ChainModel != null)
 {
-    <CallChainSvgComponent ChainModel="@ChainModel" />
+    <CallChainSvgComponent @bind-ChainModel="@ChainModel" />
 }
 <p class="text-danger">@Message</p>
 @code
