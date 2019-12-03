@@ -4,6 +4,7 @@
 @using Model
 @using ApolloWebUI.Data
 @using Microsoft.AspNetCore.Http
+@using System.Text.Json
 
 @inject IModalService ModalService
 
@@ -11,11 +12,11 @@
     <ul class="list-group bg-light">
         <li class="list-group-item">
             <label>请求串</label>
-            <textarea class="form-control" style="width:100%" disabled>@Request.Request</textarea>
+            <textarea class="form-control" style="width:100%" disabled>@Request?.Request</textarea>
         </li>
         <li class="list-group-item">
             <label>请求时间</label>
-            <textarea class="form-control" style="width:100%" disabled>@Request.RequestTime.ToString("yyyy-MM-dd hh:mm:ss fff")</textarea>
+            <textarea class="form-control" style="width:100%" disabled>@Request?.RequestTime.ToString("yyyy-MM-dd hh:mm:ss fff")</textarea>
         </li>
         <li class="list-group-item">
             <label>返回串</label>
@@ -24,6 +25,18 @@
         <li class="list-group-item">
             <label>返回时间</label>
             <textarea class="form-control" style="width:100%" disabled>@Response?.ResponseTime.ToString("yyyy-MM-dd hh:mm:ss fff")</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>产品Id</label>
+            <textarea class="form-control" style="width:100%" disabled>@GetProductId()</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>错误码</label>
+            <textarea class="form-control" style="width:100%" disabled>@GetCode()</textarea>
+        </li>
+        <li class="list-group-item">
+            <label>信息</label>
+            <textarea class="form-control" style="width:100%" disabled>@GetMessage()</textarea>
         </li>
     </ul>
     <button class="btn btn-primary" @onclick="@Done">确定</button>
@@ -47,5 +60,90 @@
     void Done()
     {
         ModalService.Close(ModalResult.Ok(""));
+    }
+
+    string GetProductId()
+    {
+        object obj;
+        if (Response?.Response != null)
+        {
+            obj = Response?.Response;
+        }
+        else
+        {
+            obj = Request?.Request;
+        }
+
+        if (obj == null)
+        {
+            return string.Empty;
+        }
+
+        var jEle = JsonSerializer.Deserialize<JsonElement>(obj.ToString());
+        if (jEle.TryGetProperty("proID", out var proId))
+        {
+            return proId.GetString();
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    string GetCode()
+    {
+        object obj;
+        if (Response?.Response != null)
+        {
+            obj = Response?.Response;
+        }
+        else
+        {
+            obj = Request?.Request;
+        }
+
+        if (obj == null)
+        {
+            return string.Empty;
+        }
+
+        var jEle = JsonSerializer.Deserialize<JsonElement>(obj.ToString());
+        if (jEle.TryGetProperty("code", out var proId))
+        {
+            return proId.GetInt32().ToString();
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+
+    string GetMessage()
+    {
+        object obj;
+        if (Response?.Response != null)
+        {
+            obj = Response?.Response;
+        }
+        else
+        {
+            obj = Request?.Request;
+        }
+
+        if (obj == null)
+        {
+            return string.Empty;
+        }
+
+        var jEle = JsonSerializer.Deserialize<JsonElement>(obj.ToString());
+        if (jEle.TryGetProperty("message", out var proId))
+        {
+            return proId.GetString();
+        }
+        else
+        {
+            return string.Empty;
+        }
     }
 }
