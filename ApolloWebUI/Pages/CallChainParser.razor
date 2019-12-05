@@ -1,11 +1,13 @@
-﻿@page "/callChainParser"
+﻿@page "/callChainParser/{traceId}"
 
 @using Blazored.Modal.Services
 @using System.Text.Json
 @using ApolloWebUI.Model
-@using ApolloWebUI.Components
+@using ApolloWebUI.Components;
 @using System.Text;
-@inject IModalService  Modal;
+@using Microsoft.Extensions.Configuration;
+@inject IModalService  Modal
+@inject IConfiguration Configuration
 <div>
     <textarea class="form-control" style="width:100%" @bind="@InputString" name="InputString"></textarea>
     <button type="submit" class="btn btn-primary" @onclick="Parse">解析</button>
@@ -18,10 +20,38 @@
 @code
 {
     string InputString { get; set; }
+    [Parameter]
+    public string TraceId { get; set; }
     CallChainModel ChainModel { get; set; }
     List<string>
     viewModel;
     string Message { get; set; }
+    static HttpClient httpClient = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (string.IsNullOrEmpty(TraceId) == false)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync($"{Configuration.GetSection("callChainUrl").Value}{TraceId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    InputString = await response.Content.ReadAsStringAsync();
+                    Parse();
+                }
+                else
+                {
+                    Message = await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message = ex.Message;
+            }
+        }
+    }
 
     private void HandleSubmit()
     {
