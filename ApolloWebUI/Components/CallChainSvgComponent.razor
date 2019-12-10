@@ -1,36 +1,44 @@
 ﻿@using ApolloWebUI.Model
 @using ApolloWebUI.Components
 
-<svg width="899" height="576">
-    @foreach (var item in viewModel)
-    {
-        var a = item.Count(o => o == '.');
-        var b = viewModel.Where(o => o.StartsWith(item) && o.Count(i => i == '.') == a + 1);
-        if (b.Count() != 0)
+@if (ChainModel != null)
+{
+    var requestSpanIds = ChainModel.Requests.Select(o => o.SpanId);
+    var responseSpanIds = ChainModel.Responses.Select(o => o.SpanId);
+    viewModel = requestSpanIds.Union(responseSpanIds.ToArray(), new SpanIdEqualityComparer())
+        .OrderBy(o => o, new SpanIdOrderComparer()).ToList();
+    <svg width="899" height="576">
+
+        @foreach (var item in viewModel)
         {
-            @foreach (var d in b)
+            var a = item.Count(o => o == '.');
+            var b = viewModel.Where(o => o.StartsWith(item) && o.Count(i => i == '.') == a + 1);
+            if (b.Count() != 0)
             {
-                int ax, ay;
-                ax = 12 * item.Split('.').Length;
-                ay = 24 + 48 * (viewModel.IndexOf(item) + 1);
-                int dx, dy;
-                dx = 12 * d.Split('.').Length;
-                dy = 24 + 48 * (viewModel.IndexOf(d) + 1);
-                <path class="trace-link" fill="rgba(0,0,0,0)" stroke="rgba(0, 0, 0, 0.1)" stroke-width="2"
-                      d="M @ax @(ay+5)
+                @foreach (var d in b)
+                {
+                    int ax, ay;
+                    ax = 12 * item.Split('.').Length;
+                    ay = 24 + 48 * (viewModel.IndexOf(item) + 1);
+                    int dx, dy;
+                    dx = 12 * d.Split('.').Length;
+                    dy = 24 + 48 * (viewModel.IndexOf(d) + 1);
+                    <path class="trace-link" fill="rgba(0,0,0,0)" stroke="rgba(0, 0, 0, 0.1)" stroke-width="2"
+                          d="M @ax @(ay+5)
                         L @ax @(dy-30)
                         L @dx @(dy-20)
                         L @dx @(dy-5)"></path>
+                }
             }
         }
-    }
-    @foreach (var item in viewModel)
-    {
-        <CallChainItemComponent ListIndex="@viewModel.IndexOf(item)"
-                                Request="@ChainModel.Requests.Where(r=>r.SpanId==item).FirstOrDefault()"
-                                Response="@ChainModel.Responses.Where(r=>r.SpanId==item).FirstOrDefault()" />
-    }
-</svg>
+        @foreach (var item in viewModel)
+        {
+            <CallChainItemComponent ListIndex="@viewModel.IndexOf(item)"
+                                    Request="@ChainModel.Requests.Where(r=>r.SpanId==item).FirstOrDefault()"
+                                    Response="@ChainModel.Responses.Where(r=>r.SpanId==item).FirstOrDefault()" />
+        }
+    </svg>
+}
 
 
 @code
@@ -38,8 +46,8 @@
     [Parameter]
     public CallChainModel ChainModel { get; set; }
 
-    
-    [Parameter] 
+
+    [Parameter]
     public EventCallback<CallChainModel> ChainModelChanged { get; set; }
 
     List<string> viewModel;
