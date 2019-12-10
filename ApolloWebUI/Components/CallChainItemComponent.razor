@@ -6,7 +6,7 @@
 @using System.Text.Json
 
 @inject IModalService ModalService
-<g transform="translate(@x, @y)" style="opacity: 1;" @onclick="HandleClick" >
+<g transform="translate(@x, @y)" style="opacity: 1;" @onclick="HandleClick">
     <rect height="42" ry="2" rx="2" y="-22" x="20" width="100%" fill="@Background()"></rect>
     <text x="13" y="5" fill="#E54C17"></text>
     <text class="node-text" x="35" y="-6" fill="#333" style="font-size: 11px;">@Request.Location</text>
@@ -53,7 +53,7 @@
                         return "rgba(255,0,0,0.5)";
                     }
                 }
-                if ((jsonElement.TryGetProperty("success", out var success) && success.GetString() == "true") == false)
+                else if ((jsonElement.TryGetProperty("success", out var success) && success.GetString() == "true") == false)
                 {
                     return "rgba(255,0,0,0.5)";
                 }
