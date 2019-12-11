@@ -6,11 +6,13 @@
 @using System.Text.Json
 
 @inject IModalService ModalService
+
+
 <g transform="translate(@x, @y)" style="opacity: 1;" @onclick="HandleClick">
     <rect height="42" ry="2" rx="2" y="-22" x="20" width="100%" fill="@Background()"></rect>
     <text x="13" y="5" fill="#E54C17"></text>
-    <text class="node-text" x="35" y="-6" fill="#333" style="font-size: 11px;">@Request.Location</text>
-    <text class="node-text" x="35" y="12" fill="#ccc" style="font-size: 11px;">@Request.Method</text>
+    <text class="node-text" x="35" y="-6" fill="#333" style="font-size: 11px;">@Request?.Location</text>
+    <text class="node-text" x="35" y="12" fill="#ccc" style="font-size: 11px;">@Request?.Method</text>
     <circle r="3" stroke-width="2.5" style="cursor: pointer; stroke: rgb(110, 64, 170);"></circle>
 </g>
 
@@ -25,44 +27,66 @@
     public CallChainResponse Response { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        var spans = (Request != null ? Request.SpanId : Response.SpanId).Split('.');
-        x = 12 * spans.Length;
-        y = 24 + 48 * (ListIndex + 1);
+        try
+        {
+            var spans = (Request != null ? Request.SpanId : Response.SpanId).Split('.');
+            x = 12 * spans.Length;
+            y = 24 + 48 * (ListIndex + 1);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void HandleClick()
     {
-        var parameters = new ModalParameters();
-        parameters.Add("request", Request);
-        parameters.Add("response", Response);
-        ModalService.Show("调用链详情", typeof(CallChainItemModal), parameters);
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("request", Request);
+            parameters.Add("response", Response);
+            ModalService.Show("调用链详情", typeof(CallChainItemModal), parameters);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private string Background()
     {
-        if (Response?.Response != null)
+        try
         {
-            try
+            if (Response?.Response != null)
             {
-                JsonElement jsonElement = JsonSerializer.Deserialize<JsonElement>
-            (Response?.Response.ToString());
-                if (jsonElement.TryGetProperty("code", out var code))
+                try
                 {
-                    if (code.GetInt32() != 0)
+                    JsonElement jsonElement = JsonSerializer.Deserialize<JsonElement>
+                (Response?.Response.ToString());
+                    if (jsonElement.TryGetProperty("code", out var code))
+                    {
+                        if (code.GetInt32() != 0)
+                        {
+                            return "rgba(255,0,0,0.5)";
+                        }
+                    }
+                    else if ((jsonElement.TryGetProperty("success", out var success) && success.GetString() == "true") == false)
                     {
                         return "rgba(255,0,0,0.5)";
                     }
                 }
-                else if ((jsonElement.TryGetProperty("success", out var success) && success.GetString() == "true") == false)
+                catch (Exception ex)
                 {
-                    return "rgba(255,0,0,0.5)";
+                    ;
                 }
             }
-            catch (Exception ex)
-            {
-                ;
-            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
         return "rgba(0,0,0,0)";
     }
 }
