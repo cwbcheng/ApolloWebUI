@@ -110,7 +110,14 @@
         var jEle = JsonSerializer.Deserialize<JsonElement>(obj.ToString());
         if (jEle.TryGetProperty("code", out var proId))
         {
-            return proId.GetInt32().ToString();
+            if (proId.ValueKind == JsonValueKind.Number)
+            {
+                return proId.GetInt32().ToString();
+            }
+            else
+            {
+                return "无";
+            }
         }
         else
         {
