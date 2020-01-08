@@ -1,6 +1,9 @@
 ﻿@page "/"
 @namespace ApolloWebUI.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Configuration;
+@using System.Text
+@inject IConfiguration config
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,6 +21,10 @@
         @(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))
     </app>
 
+    <div class="text-center">
+        <a href="http://www.beian.miit.gov.cn/">@(System.Web.HttpUtility.UrlDecode(config.GetValue<string>
+                ("icp")))</a>
+    </div>
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>
