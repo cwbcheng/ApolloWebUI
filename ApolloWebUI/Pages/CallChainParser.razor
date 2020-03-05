@@ -17,6 +17,45 @@
     <CallChainSvgComponent @bind-ChainModel="@ChainModel" />
 }
 <p class="text-danger">@Message</p>
+<div>
+    @robotLogResult
+
+    @foreach (var span in robotLogs)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>
+                        @span.FirstOrDefault()?.ProcessId
+                    </td>
+                    <td>
+                        @span.FirstOrDefault(s => s.FormId != null)?.FormId
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var logs in span)
+                {
+
+                    <tr>
+                        <td>
+                            @(new DateTime(logs.Time))
+                        </td>
+                        <td>
+                            @logs.RepositoryName
+                        </td>
+                        <td>
+                            @logs.Level
+                        </td>
+                        <td>
+                            @logs.Message
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
 @code
 {
     string InputString { get; set; }
@@ -27,6 +66,8 @@
     viewModel;
     string Message { get; set; }
     static HttpClient httpClient = new HttpClient();
+    string robotLogResult = null;
+    List<List<RobotLogModel>> robotLogs = new List<List<RobotLogModel>>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,6 +85,17 @@
                 else
                 {
                     Message = await response.Content.ReadAsStringAsync();
+                }
+
+                var response1 = await httpClient.GetAsync($"{Configuration.GetSection("robotLogUrl").Value}{TraceId}");
+                if (response1.IsSuccessStatusCode)
+                {
+                    var robotLogResult = await response1.Content.ReadAsStringAsync();
+                    robotLogs = JsonSerializer.Deserialize<List<List<RobotLogModel>>>(robotLogResult);
+                }
+                else
+                {
+                    robotLogResult = await response1.Content.ReadAsStringAsync();
                 }
             }
             catch (Exception ex)
