@@ -39,7 +39,7 @@
 
                     <tr>
                         <td>
-                            @(new DateTime(logs.Time))
+                            @(new DateTime(logs.Time).ToString("yyyy-MM-dd HH:mm:ss.fff"))
                         </td>
                         <td>
                             @logs.RepositoryName
