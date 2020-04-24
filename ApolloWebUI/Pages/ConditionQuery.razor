@@ -36,32 +36,53 @@
 
     async Task Search()
     {
+        string result;
+        try
+        {
+            result = await BuildRequestBody(conditions);
+        }
+        catch (Exception ex)
+        {
+            Message = $"查询条件有错误：{ex.Message}";
+            return;
+        }
+
+        string content;
+        try
+        {
+            StringContent stringContent = new StringContent(result, Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync("http://47.104.151.218:9200/request/_search", stringContent);
+            content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(content);
+        }
+        catch (Exception ex)
+        {
+            Message = $"查询 ES 出现异常：{ex.Message}";
+            return;
+        }
 
         try
         {
-            var result = await BuildRequestBody(conditions);
-            StringContent stringContent = new StringContent(result, Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync("http://47.104.151.218:9200/request/_search", stringContent);
-            var content = await response.Content.ReadAsStringAsync();
-            JsonElement jobj = JsonSerializer.Deserialize<JsonElement>
-                (content);
-            if (jobj.GetProperty("hits").GetProperty("total").GetProperty("value").GetInt32() > 10)
+            JsonElement jobj = JsonSerializer.Deserialize<JsonElement>(content);
+            TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray().Select(o => o.GetProperty("_source").GetProperty("traceId").GetString()).Distinct().ToList();
+            if (TraceIds.Count <= 0)
             {
-                Message = "查询结果超过10个，请调整查询条件";
+                Message = "无查询结果";
+            }
+            else if (TraceIds.Count > 10)
+            {
+                Message = "查询结果超过10个，可尝试调整查询条件";
             }
             else
             {
                 Message = string.Empty;
             }
-            if (jobj.GetProperty("hits").GetProperty("total").GetProperty("value").GetInt32() > 0)
-            {
-                TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray().Select(o => o.GetProperty("_source").GetProperty("traceId").GetString()).ToList();
-            }
         }
         catch (Exception ex)
         {
-            Message = ex.ToString();
+            Message = $"处理结果时出现异常：{ex.Message}";
         }
+
     }
 
     static async Task<string>
@@ -71,8 +92,11 @@
         var buffer = new ArrayBufferWriter<byte>
             ();
         Utf8JsonWriter utf8JsonWriter = new Utf8JsonWriter(buffer);
-
         utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteNumber("size", 100);
+        utf8JsonWriter.WriteStartArray("_source");
+        utf8JsonWriter.WriteStringValue("traceId");
+        utf8JsonWriter.WriteEndArray();
         utf8JsonWriter.WriteStartObject("query");
         utf8JsonWriter.WriteStartObject("bool");
         utf8JsonWriter.WriteStartArray("must");
