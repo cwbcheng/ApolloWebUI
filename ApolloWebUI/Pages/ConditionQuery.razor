@@ -1,0 +1,108 @@
+﻿@page "/ConditionalQuery"
+
+@using Blazored.Modal.Services
+@using System.Text.Json
+@using ApolloWebUI.Model
+@using System.Text;
+@using Microsoft.Extensions.Configuration;
+@using System.Buffers;
+@inject IModalService  Modal
+@inject IConfiguration Configuration
+
+<div>
+    <textarea class="form-control" style="width:100%" @bind="@conditions"></textarea>
+    <button @onclick="Search">查询</button>
+</div>
+<div>
+    <p style="color:red">@Message</p>
+    <ul>
+        @foreach (var traceId in TraceIds)
+        {
+            <li><a href="/callChainParser/@traceId" target="_blank">@traceId</a></li>
+        }
+    </ul>
+</div>
+@code {
+
+    string conditions = string.Empty;
+    string Message { get; set; } = string.Empty;
+    List<string> TraceIds { get; set; } = new List<string>();
+
+    static HttpClient HttpClient = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    async Task Search()
+    {
+
+        try
+        {
+            var result = await BuildRequestBody(conditions);
+            StringContent stringContent = new StringContent(result, Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync("http://47.104.151.218:9200/request/_search", stringContent);
+            var content = await response.Content.ReadAsStringAsync();
+            JsonElement jobj = JsonSerializer.Deserialize<JsonElement>
+                (content);
+            if (jobj.GetProperty("hits").GetProperty("total").GetProperty("value").GetInt32() > 10)
+            {
+                Message = "查询结果超过10个，请调整查询条件";
+            }
+            else
+            {
+                Message = string.Empty;
+            }
+            if (jobj.GetProperty("hits").GetProperty("total").GetProperty("value").GetInt32() > 0)
+            {
+                TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray().Select(o => o.GetProperty("_source").GetProperty("traceId").GetString()).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = ex.ToString();
+        }
+    }
+
+    static async Task<string>
+        BuildRequestBody(string conditions)
+    {
+        var a = conditions.Split("\n");
+        var buffer = new ArrayBufferWriter<byte>
+            ();
+        Utf8JsonWriter utf8JsonWriter = new Utf8JsonWriter(buffer);
+
+        utf8JsonWriter.WriteStartObject();
+        utf8JsonWriter.WriteStartObject("query");
+        utf8JsonWriter.WriteStartObject("bool");
+        utf8JsonWriter.WriteStartArray("must");
+        foreach (var item in a)
+        {
+            utf8JsonWriter.WriteStartObject();
+            var b = item.Split(':');
+            utf8JsonWriter.WriteStartObject("term");
+            if (b[1].StartsWith("\"") && b[1].EndsWith("\""))
+            {
+                utf8JsonWriter.WriteString(b[0], b[1].Trim('\"'));
+            }
+            else if (b[1].ToLower() == "true" || b[1].ToLower() == "false")
+            {
+                utf8JsonWriter.WriteBoolean(b[0], bool.Parse(b[1]));
+            }
+            else
+            {
+                utf8JsonWriter.WriteNumber(b[0], decimal.Parse(b[1]));
+            }
+            utf8JsonWriter.WriteEndObject();
+            utf8JsonWriter.WriteEndObject();
+        }
+        utf8JsonWriter.WriteEndArray();
+        utf8JsonWriter.WriteEndObject();
+        utf8JsonWriter.WriteEndObject();
+        utf8JsonWriter.WriteEndObject();
+        await utf8JsonWriter.FlushAsync();
+        var output = buffer.WrittenSpan.ToArray();
+        var result = Encoding.UTF8.GetString(output);
+        return result;
+    }
+}
