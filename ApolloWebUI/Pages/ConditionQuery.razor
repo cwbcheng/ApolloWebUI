@@ -51,7 +51,7 @@
         try
         {
             StringContent stringContent = new StringContent(result, Encoding.UTF8, "application/json");
-            var response = await HttpClient.PostAsync("http://47.104.151.218:9200/request/_search", stringContent);
+            var response = await HttpClient.PostAsync($"{Configuration.GetSection("callChainUrl").Value}error", stringContent);
             content = await response.Content.ReadAsStringAsync();
             Console.WriteLine(content);
         }
