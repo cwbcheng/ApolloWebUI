@@ -11,8 +11,14 @@
 
 <div>
     <textarea class="form-control" style="width:100%" @bind="@conditions"></textarea>
-    <button @onclick="Search">查询</button>
+    <input type="checkbox" @bind-value="@isUseTimeRange" id="timeRange" /><label for="timeRange">时间范围</label>
+    @if (isUseTimeRange)
+    {
+        <label>起始时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind-value="startTime" />
+        <label>结束时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind-value="endTime" />
+    }
 </div>
+<button @onclick="Search">查询</button>
 <div>
     <p style="color:red">@Message</p>
     <ul>
@@ -27,6 +33,9 @@
     string conditions = string.Empty;
     string Message { get; set; } = string.Empty;
     List<string> TraceIds { get; set; } = new List<string>();
+    bool isUseTimeRange { get; set; }
+    DateTime startTime = DateTime.Now;
+    DateTime endTime = DateTime.Now;
 
     static HttpClient HttpClient = new HttpClient();
 
@@ -39,7 +48,9 @@
         string result;
         try
         {
-            result = await BuildRequestBody(conditions);
+            Console.WriteLine(startTime);
+            Console.WriteLine(endTime);
+            result = await BuildRequestBody(conditions, startTime, endTime);
         }
         catch (Exception ex)
         {
@@ -64,7 +75,9 @@
         try
         {
             JsonElement jobj = JsonSerializer.Deserialize<JsonElement>(content);
-            TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray().Select(o => o.GetProperty("_source").GetProperty("traceId").GetString()).Distinct().ToList();
+            TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray()
+                .Select(o => o.GetProperty("_source").GetProperty("traceId").GetString())
+                .Distinct().ToList();
             if (TraceIds.Count <= 0)
             {
                 Message = "无查询结果";
@@ -85,17 +98,18 @@
 
     }
 
-    static async Task<string>
-        BuildRequestBody(string conditions)
+    async Task<string>
+        BuildRequestBody(string conditions, DateTime startTime, DateTime endTime)
     {
         var a = conditions.Split("\n");
         var buffer = new ArrayBufferWriter<byte>
             ();
         Utf8JsonWriter utf8JsonWriter = new Utf8JsonWriter(buffer);
         utf8JsonWriter.WriteStartObject();
-        utf8JsonWriter.WriteNumber("size", 100);
+        utf8JsonWriter.WriteNumber("size", 1000);
         utf8JsonWriter.WriteStartArray("_source");
         utf8JsonWriter.WriteStringValue("traceId");
+        utf8JsonWriter.WriteStringValue("requestTime");
         utf8JsonWriter.WriteEndArray();
         utf8JsonWriter.WriteStartObject("query");
         utf8JsonWriter.WriteStartObject("bool");
@@ -120,8 +134,25 @@
             utf8JsonWriter.WriteEndObject();
             utf8JsonWriter.WriteEndObject();
         }
+        if (isUseTimeRange)
+        {
+            utf8JsonWriter.WriteStartObject();
+            utf8JsonWriter.WriteStartObject("range");
+            utf8JsonWriter.WriteStartObject("requestTime");
+            utf8JsonWriter.WriteString("lte", endTime);
+            utf8JsonWriter.WriteString("gte", startTime);
+            utf8JsonWriter.WriteEndObject();
+            utf8JsonWriter.WriteEndObject();
+            utf8JsonWriter.WriteEndObject();
+        }
         utf8JsonWriter.WriteEndArray();
         utf8JsonWriter.WriteEndObject();
+
+
+
+
+
+
         utf8JsonWriter.WriteEndObject();
         utf8JsonWriter.WriteEndObject();
         await utf8JsonWriter.FlushAsync();
