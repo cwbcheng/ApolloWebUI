@@ -16,7 +16,7 @@
     @if (isUseTimeRange)
     {
         <label>起始时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind="startTime" @bind:format="yyyy-MM-dd HH:mm:ss" />
-        <label>结束时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind="endTime" @bind:format="yyyy-MM-dd HH:mm:ss"/>
+        <label>结束时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind="endTime" @bind:format="yyyy-MM-dd HH:mm:ss" />
     }
 </div>
 <button @onclick="Search">查询</button>
@@ -25,7 +25,7 @@
     <ul>
         @foreach (var traceId in TraceIds)
         {
-            <li><a href="/callChainParser/@traceId" target="_blank">@traceId</a></li>
+            <li><a href="/callChainParser/@traceId.Item1" target="_blank">@traceId.Item1 (@traceId.Item2)</a></li>
         }
     </ul>
 </div>
@@ -33,7 +33,7 @@
 
     string conditions = string.Empty;
     string Message { get; set; } = string.Empty;
-    List<string> TraceIds { get; set; } = new List<string>();
+    List<(string, DateTime)> TraceIds { get; set; } = new List<(string, DateTime)>();
     bool isUseTimeRange { get; set; }
     DateTime startTime { get; set; } = DateTime.Now;
     DateTime endTime = DateTime.Now;
@@ -76,10 +76,29 @@
 
         try
         {
-            JsonElement jobj = JsonSerializer.Deserialize<JsonElement>(content);
-            TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray()
-                .Select(o => o.GetProperty("_source").GetProperty("traceId").GetString())
-                .Distinct().ToList();
+            JsonElement jobj = JsonSerializer.Deserialize<JsonElement>
+                (content);
+            var a = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray()
+            .Select(o => (o.GetProperty("_source").GetProperty("traceId").GetString(), o.GetProperty("_source").GetProperty("requestTime").GetDateTime()))
+            .OrderBy(o => o.Item2).ToList();
+            string temp = null;
+            TraceIds.Clear();
+            foreach (var item in a)
+            {
+                if (temp == item.Item1)
+                {
+                    continue;
+                }
+                else
+                {
+                    temp = item.Item1;
+                    TraceIds.Add(item);
+                }
+            }
+            //TraceIds = jobj.GetProperty("hits").GetProperty("hits").EnumerateArray()
+            //.Select(o => (o.GetProperty("_source").GetProperty("traceId").GetString(), o.GetProperty("_source").GetProperty("requestTime").GetDateTime()))
+            //.OrderBy(o => o.Item2)
+            //.Distinct().ToList();
             if (TraceIds.Count <= 0)
             {
                 Message = "无查询结果";
@@ -97,7 +116,6 @@
         {
             Message = $"处理结果时出现异常：{ex.Message}";
         }
-
     }
 
     async Task<string>
@@ -149,12 +167,6 @@
         }
         utf8JsonWriter.WriteEndArray();
         utf8JsonWriter.WriteEndObject();
-
-
-
-
-
-
         utf8JsonWriter.WriteEndObject();
         utf8JsonWriter.WriteEndObject();
         await utf8JsonWriter.FlushAsync();
