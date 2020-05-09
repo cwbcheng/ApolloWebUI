@@ -6,6 +6,7 @@
 @using System.Text;
 @using Microsoft.Extensions.Configuration;
 @using System.Buffers;
+@using System.ComponentModel.DataAnnotations;
 @inject IModalService  Modal
 @inject IConfiguration Configuration
 
@@ -14,8 +15,8 @@
     <input type="checkbox" @bind-value="@isUseTimeRange" id="timeRange" /><label for="timeRange">时间范围</label>
     @if (isUseTimeRange)
     {
-        <label>起始时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind-value="startTime" />
-        <label>结束时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind-value="endTime" />
+        <label>起始时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind="startTime" @bind:format="yyyy-MM-dd HH:mm:ss" />
+        <label>结束时间</label><input type="datetime" placeholder="yyyy-MM-dd hh:mm:ss" @bind="endTime" @bind:format="yyyy-MM-dd HH:mm:ss"/>
     }
 </div>
 <button @onclick="Search">查询</button>
@@ -34,8 +35,9 @@
     string Message { get; set; } = string.Empty;
     List<string> TraceIds { get; set; } = new List<string>();
     bool isUseTimeRange { get; set; }
-    DateTime startTime = DateTime.Now;
+    DateTime startTime { get; set; } = DateTime.Now;
     DateTime endTime = DateTime.Now;
+    DateTime CurrentValue { get; set; } = DateTime.Now;
 
     static HttpClient HttpClient = new HttpClient();
 
