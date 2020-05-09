@@ -25,7 +25,7 @@
     <ul>
         @foreach (var traceId in TraceIds)
         {
-            <li><a href="/callChainParser/@traceId.Item1" target="_blank">@traceId.Item1 (@traceId.Item2)</a></li>
+            <li><a href="/callChainParser/@traceId.Item1" target="_blank">@traceId.Item1 (@traceId.Item2.ToString("yyyy-MM-dd HH:mm:ss"))</a></li>
         }
     </ul>
 </div>
