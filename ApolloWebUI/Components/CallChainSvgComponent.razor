@@ -3,7 +3,11 @@
 
 @if (ChainModel != null)
 {
-    var requestSpanIds = ChainModel.Requests.Select(o => o.SpanId);
+    var requestSpanIds = ChainModel.Requests?.Select(o => o.SpanId);
+    if(requestSpanIds == null)
+    {
+        return;
+    }
     var responseSpanIds = ChainModel.Responses.Select(o => o.SpanId);
     viewModel = requestSpanIds.Union(responseSpanIds.ToArray(), new SpanIdEqualityComparer())
         .OrderBy(o => o, new SpanIdOrderComparer()).ToList();
