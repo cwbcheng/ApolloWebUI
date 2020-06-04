@@ -22,9 +22,34 @@
     </app>
 
     <div class="text-center">
-        <a href="http://www.beian.miit.gov.cn/">@(System.Web.HttpUtility.UrlDecode(config.GetValue<string>
-                ("icp")))</a>
+        <a href="http://www.beian.miit.gov.cn/">
+            @(System.Web.HttpUtility.UrlDecode(config.GetValue<string>
+                ("icp")))
+        </a>
     </div>
     <script src="_framework/blazor.server.js"></script>
+    <script>
+        function saveCookie(conditions) {
+            console.log("saveCookie:" + conditions);
+            document.cookie = "conditions=" + conditions;
+        }
+
+        function loadCookie() {
+            console.log("loadCookie:");
+            var cookie = getCookie("conditions");
+            console.log(cookie);
+            return cookie;
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i].trim();
+                if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+            }
+            return "";
+        }
+    </script>
 </body>
 </html>

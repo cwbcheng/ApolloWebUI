@@ -7,11 +7,14 @@
 @using Microsoft.Extensions.Configuration;
 @using System.Buffers;
 @using System.ComponentModel.DataAnnotations;
+@using Microsoft.AspNetCore.Http.Features
+@using Microsoft.AspNetCore.Http
 @inject IModalService  Modal
 @inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime;
 
 <div>
-    <textarea class="form-control" style="width:100%" @bind="@conditions"></textarea>
+    <textarea class="form-control" style="width:100%" @bind="@Conditions"></textarea>
     <input type="checkbox" @bind-value="@isUseTimeRange" id="timeRange" /><label for="timeRange">时间范围</label>
     @if (isUseTimeRange)
     {
@@ -30,8 +33,20 @@
     </ul>
 </div>
 @code {
-
-    string conditions = string.Empty;
+    string _conditions;
+    string Conditions
+    {
+        get
+        {
+            //httpContextAccessor.HttpContext.Request.Cookies.TryGetValue("Conditions", out _conditions);
+            return _conditions;
+        }
+        set
+        {
+            _conditions = value;
+            JSRuntime.InvokeVoidAsync("saveCookie", _conditions);
+        }
+    }
     string Message { get; set; } = string.Empty;
     List<(string, DateTime)> TraceIds { get; set; } = new List<(string, DateTime)>();
     bool isUseTimeRange { get; set; }
@@ -43,6 +58,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        try
+        {
+            _conditions = await JSRuntime.InvokeAsync<string>("loadCookie");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     async Task Search()
@@ -52,7 +75,7 @@
         {
             Console.WriteLine(startTime);
             Console.WriteLine(endTime);
-            result = await BuildRequestBody(conditions, startTime, endTime);
+            result = await BuildRequestBody(Conditions, startTime, endTime);
         }
         catch (Exception ex)
         {
@@ -173,5 +196,10 @@
         var output = buffer.WrittenSpan.ToArray();
         var result = Encoding.UTF8.GetString(output);
         return result;
+    }
+
+    async Task SaveConditions()
+    {
+
     }
 }
