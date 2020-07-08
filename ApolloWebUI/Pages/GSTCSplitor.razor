@@ -18,7 +18,7 @@
 <ul>
     @foreach (var p in paramters)
     {
-        <li>@p</li>
+        <li>ej_@(p.Item1)=@(p.Item2)</li>
     }
 </ul>
 <button @onclick="Split">查询</button>
@@ -28,27 +28,26 @@
 @code {
     string _requestUri;
     string RequestUri
-    {
+{
         get
-        {
+{
             return _requestUri;
         }
         set
-        {
+{
             _requestUri = value;
         }
     }
     string Message { get; set; } = string.Empty;
 
-    List<string> paramters = new List<string>();
+    List<(string, string)> paramters = new List<(string, string)>();
 
-    string uriTemple = "https://ttc.chinalife-p.com.cn/MSF/wecheat-html/product/producd170.html?pid={pid}&productId={productId}&salesMenNO={userName}&sysId={sysId}&productNo={productNo}&organizationId={organizationId}&saleChannelId={saleChannelId}&businessNature={businessNature}&agentId={agentId}&agencyAgree={agencyAgree}&disRate={disRate}&handlerCode={userName}&lifeOperatorCode={userName}&makecom={makecom}&approvercode={userName}&sysSourceCode={sysSourceCode}&riskcode={riskcode}&verId={verId}&saleInfoId={saleInfoId}&identificationCode={identificationCode}&extParams={extParams}&history={history}";
 
     async Task Split()
     {
-
         try
         {
+            string uriTemple = Configuration["uriTemple"];
             if (string.IsNullOrWhiteSpace(RequestUri))
             {
                 Message = "链接不能为空";
@@ -61,27 +60,38 @@
             var uri = new Uri(RequestUri);
             var qs = uri.Query.Substring(1).Split('&');
             string userName = null;
+            var userNamesSection = Configuration.GetSection("userNames");
+            var userNamesArray = userNamesSection.AsEnumerable();
+            List<string> userNames = new List<string>();
+            foreach (var item in userNamesArray)
+            {
+                userNames.Add(item.Value);
+            }
             foreach (var item in qs)
             {
-                paramters.Add($"ej_{item}");
-                if (item.StartsWith("salesMenNO"))
+                var temp = item.Split('=', 2);
+                if (temp[0] == "salesMenNO")
                 {
-                    var a = item.Split('=', 2);
-                    userName = a[1];
+                    userName = temp[1];
+                    continue;
                 }
+                else if (userNames.Contains(temp[0]))
+                {
+                    continue;
+                }
+                paramters.Add((temp[0], temp[1]));
             }
 
             StringBuilder sb = new StringBuilder(uriTemple);
             foreach (var item in paramters)
             {
-                var a = item.Split('=', 2);
-                sb.Replace($"{{{a[0].Substring("ej_".Length)}}}", a[1]);
+                sb.Replace($"{{{item.Item1}}}", item.Item2);
             }
             sb.Replace($"{{userName}}", userName);
             var newUri = sb.ToString();
             if (newUri != RequestUri)
             {
-                Message = $"警告！生成的Uri与原Uri不一致！（{newUri}）";
+                Message = $"警告！生成的Uri与原Uri不一致！对比Uri的参数数量和名称是否变化（{newUri}）";
             }
         }
         catch (Exception ex)
@@ -89,5 +99,5 @@
             Console.WriteLine(ex);
             Message = $"处理结果时出现异常：{ex.Message}";
         }
-    }
+}
 }
