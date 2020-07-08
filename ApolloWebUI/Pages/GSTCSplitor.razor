@@ -16,6 +16,7 @@
     <textarea class="form-control" style="width:100%" @bind="@RequestUri"></textarea>
 </div>
 <ul>
+    <li>uriTemple=@uriTemple</li>
     @foreach (var p in paramters)
     {
         <li>ej_@(p.Item1)=@(p.Item2)</li>
@@ -28,13 +29,13 @@
 @code {
     string _requestUri;
     string RequestUri
-{
+    {
         get
-{
+        {
             return _requestUri;
         }
         set
-{
+        {
             _requestUri = value;
         }
     }
@@ -42,12 +43,13 @@
 
     List<(string, string)> paramters = new List<(string, string)>();
 
+    string uriTemple = null;
 
     async Task Split()
     {
         try
         {
-            string uriTemple = Configuration["uriTemple"];
+            uriTemple = Configuration["uriTemple"];
             if (string.IsNullOrWhiteSpace(RequestUri))
             {
                 Message = "链接不能为空";
@@ -99,5 +101,5 @@
             Console.WriteLine(ex);
             Message = $"处理结果时出现异常：{ex.Message}";
         }
-}
+    }
 }
