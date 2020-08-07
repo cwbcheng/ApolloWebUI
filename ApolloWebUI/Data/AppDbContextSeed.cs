@@ -4,26 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using ApolloWebUI.Model;
+using Microsoft.Extensions.Configuration;
+using Microsoft.CodeAnalysis;
+using System.Text;
 
 namespace ApolloWebUI.Data
 {
     public class AppDbContextSeed
     {
-        private UserManager<IdentityUser> _userManager;
+        private UserManager<ApplicationUser> _userManager;
         public async Task SeedAsync(AppDbContext context, IServiceProvider services)
         {
             using (var scope = services.CreateScope())
             {
                 if (context.Users.Any() == false)
                 {
+                    var config = services.GetService<IConfiguration>();
+                    var defaultAdmin = config.GetSection("defaultAdmin");
                     _userManager =
-                        scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-                    var defaultUser = new IdentityUser
+                        scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    var defaultUser = new ApplicationUser
                     {
-                        UserName = "a@b.c",
-                        Email = "a@b.c",
+                        Name = defaultAdmin["name"].ToString(),
+                        UserName = defaultAdmin["email"],
+                        Email = defaultAdmin["email"],
                     };
-                    var result = await _userManager.CreateAsync(defaultUser, "123456");
+                    var result = await _userManager.CreateAsync(defaultUser, defaultAdmin["password"]);
 
                     if (result.Succeeded == false)
                     {

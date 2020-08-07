@@ -1,0 +1,110 @@
+﻿@page "/Users"
+@attribute [Authorize]
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using System.Text.Json
+@using ApolloWebUI.Model
+@using ApolloWebUI.Components
+@using ApolloWebUI.Data;
+@using Microsoft.Extensions.DependencyInjection;
+@using Microsoft.AspNetCore.Identity;
+
+@inject IModalService Modal;
+@inject AppDbContext context;
+@inject IServiceProvider services;
+
+<table ="table">
+    <tr>
+        <td>Name</td>
+        <td>
+            <input @bind="newName" />
+        </td>
+    </tr>
+    <tr>
+        <td>Email</td>
+        <td>
+            <input @bind="newEmail" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Password
+        </td>
+        <td>
+            <input @bind="newPassword" type="password" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td>
+            <button @onclick="Insert">新增</button>
+        </td>
+    </tr>
+</table>
+
+<table class="table">
+    <tbody>
+        @foreach (var user in users)
+        {
+
+            <tr>
+                <td>
+                    @user.Name
+                </td>
+                <td>
+                    @user.Email
+                </td>
+                <td>
+                    修改密码
+                </td>
+                <td>
+                    禁用
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code{
+    List<ApplicationUser> users;
+
+    string newName = string.Empty;
+    string newEmail = string.Empty;
+    string newPassword = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var scope = services.CreateScope())
+        {
+            users = context.Users.ToList();
+        }
+    }
+
+    async Task Insert()
+    {
+        using (var scope = services.CreateScope())
+        {
+            var userManager =
+                    scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var defaultUser = new ApplicationUser
+            {
+                Name = newName,
+                UserName = newEmail,
+                Email = newEmail,
+            };
+            var result = await userManager.CreateAsync(defaultUser, newPassword);
+
+            if (result.Succeeded == false)
+            {
+                var r = result.Errors.FirstOrDefault();
+            }
+            else
+            {
+                users = context.Users.ToList();
+            }
+        }
+    }
+}

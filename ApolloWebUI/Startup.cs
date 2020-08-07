@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.SignalR;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using ApolloWebUI.Model;
 
 namespace ApolloWebUI
 {
@@ -29,7 +32,7 @@ namespace ApolloWebUI
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<ApplicationUser>()
                 .AddEntityFrameworkStores<AppDbContext>();
             services.Configure<IdentityOptions>(options =>
             {// ÃÜÂëÉèÖÃoptions.Password.RequireDigit = false;
@@ -72,12 +75,19 @@ namespace ApolloWebUI
 
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapBlazorHub();
+                endpoints.Map("Identity/Account/Register", Index);
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+
+        static async Task Index(HttpContext context)
+        {
+            await context.Response.WriteAsync("½ûÖ¹×¢²á");
         }
     }
 }

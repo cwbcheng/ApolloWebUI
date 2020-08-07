@@ -1,12 +1,30 @@
-﻿<AuthorizeView>
+﻿@using Microsoft.AspNetCore.Identity
+@using ApolloWebUI.Model
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider provider
+
+<AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage">Hello, @context.User.Identity.Name!</a>
+        <a href="Identity/Account/Manage">Hello, @name!</a>
         <form method="post" action="Identity/Account/LogOut">
             <button type="submit" class="nav-link btn btn-link">Log out</button>
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
         <a href="Identity/Account/Login">Login</a>
     </NotAuthorized>
 </AuthorizeView>
+
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var state = await provider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(state.User);
+        name = user?.Name;
+        return;
+    }
+    string name;
+}

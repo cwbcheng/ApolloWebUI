@@ -3,8 +3,9 @@
 *@
 @page
 @using Microsoft.AspNetCore.Identity
+@using ApolloWebUI.Model
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<IdentityUser> SignInManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 @functions
 {
