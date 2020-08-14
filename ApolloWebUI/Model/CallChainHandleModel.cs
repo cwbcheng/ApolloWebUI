@@ -14,5 +14,7 @@ namespace ApolloWebUI.Model
         public string TraceId { get; set; }
 
         public string Content { get; set; }
+
+        public DateTime Time { get; set; }
     }
 }

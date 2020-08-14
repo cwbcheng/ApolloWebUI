@@ -28,7 +28,7 @@
     @foreach (var handle in callChainHandleModels)
     {
         <li>
-            @GetUserName(handle.UserId) : @handle.Content
+            @handle.Time @GetUserName(handle.UserId) : @handle.Content
         </li>
     }
 </ul>
@@ -185,7 +185,8 @@
         {
             TraceId = TraceId,
             UserId = userId,
-            Content = HandleStage
+            Content = HandleStage,
+            Time = DateTime.Now
         };
         HandleStage = string.Empty;
         CallChainContext.Add(model);
@@ -195,6 +196,6 @@
 
     string GetUserName(string id)
     {
-        return DbContext.Users.FirstOrDefault(u=>u.Id == id)?.Name;
+        return DbContext.Users.FirstOrDefault(u => u.Id == id)?.Name;
     }
 }
