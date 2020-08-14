@@ -1,13 +1,19 @@
 ﻿@page "/callChainParser/{traceId}"
-
+@attribute [Authorize]
 @using Blazored.Modal.Services
 @using System.Text.Json
 @using ApolloWebUI.Model
 @using ApolloWebUI.Components;
 @using System.Text;
 @using Microsoft.Extensions.Configuration;
+@using Microsoft.AspNetCore.Identity
+@using ApolloWebUI.Data
 @inject IModalService  Modal
 @inject IConfiguration Configuration
+@inject CallChainHandleDbContext CallChainContext
+@inject AppDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider provider
 <div>
     <textarea class="form-control" style="width:100%" @bind="@InputString" name="InputString"></textarea>
     <button type="submit" class="btn btn-primary" @onclick="Parse">解析</button>
@@ -17,6 +23,19 @@
     <CallChainSvgComponent @bind-ChainModel="@ChainModel" />
 }
 <p class="text-danger">@Message</p>
+
+<ul>
+    @foreach (var handle in callChainHandleModels)
+    {
+        <li>
+            @GetUserName(handle.UserId) : @handle.Content
+        </li>
+    }
+</ul>
+<div>
+    <textarea class="form-control" style="width:100%" @bind="@HandleStage" name="HandleStage"></textarea>
+    <button type="submit" class="btn btn-primary" @onclick="Handle">填写处理情况</button>
+</div>
 <div>
     @robotLogResult
 
@@ -59,6 +78,7 @@
 @code
 {
     string InputString { get; set; }
+    string HandleStage { get; set; }
     [Parameter]
     public string TraceId { get; set; }
     CallChainModel ChainModel { get; set; }
@@ -68,6 +88,7 @@
     static HttpClient httpClient = new HttpClient();
     string robotLogResult = null;
     List<List<RobotLogModel>> robotLogs = new List<List<RobotLogModel>>();
+    List<CallChainHandleModel> callChainHandleModels = new List<CallChainHandleModel>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,6 +122,15 @@
             catch (Exception ex)
             {
                 Message = ex.Message;
+            }
+
+            try
+            {
+                callChainHandleModels = CallChainContext.CallChainHandles.Where(o => o.TraceId == TraceId).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
     }
@@ -140,5 +170,31 @@
             Message = ex.Message;
             Console.WriteLine(ex);
         }
+    }
+
+    async Task Handle()
+    {
+        if (string.IsNullOrWhiteSpace(HandleStage?.Trim()))
+        {
+            return;
+        }
+        var state = await provider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(state.User);
+        var userId = user.Id;
+        var model = new CallChainHandleModel()
+        {
+            TraceId = TraceId,
+            UserId = userId,
+            Content = HandleStage
+        };
+        HandleStage = string.Empty;
+        CallChainContext.Add(model);
+        await CallChainContext.SaveChangesAsync();
+        callChainHandleModels = CallChainContext.CallChainHandles.Where(o => o.TraceId == TraceId).ToList();
+    }
+
+    string GetUserName(string id)
+    {
+        return DbContext.Users.FirstOrDefault(u=>u.Id == id)?.Name;
     }
 }

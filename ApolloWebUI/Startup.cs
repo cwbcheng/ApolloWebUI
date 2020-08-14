@@ -31,7 +31,9 @@ namespace ApolloWebUI
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection")))
+                .AddDbContext<CallChainHandleDbContext>(options =>
+                    options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<ApplicationUser>()
                 .AddEntityFrameworkStores<AppDbContext>();
             services.Configure<IdentityOptions>(options =>

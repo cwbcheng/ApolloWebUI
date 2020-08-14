@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using ApolloWebUI.Data;
+using ApolloWebUI.Model;
 
 namespace ApolloWebUI
 {
@@ -12,6 +13,10 @@ namespace ApolloWebUI
                 .MigrateDbContext<AppDbContext>((context, services) =>
                 {
                     new AppDbContextSeed().SeedAsync(context, services).Wait();
+                })
+                .MigrateDbContext<CallChainHandleDbContext>((context, services) =>
+                {
+
                 })
                 .Run();
         }
