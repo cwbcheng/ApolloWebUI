@@ -48,8 +48,10 @@
     <tbody>
         @foreach (var user in users)
         {
-
             <tr>
+                <td>
+                    <input type="checkbox" @onchange="@((ChangeEventArgs args)=> { if ((bool)args.Value == true) { selectedIds.Add(user.Id); } else {selectedIds.Remove(user.Id); } })" />
+                </td>
                 <td>
                     @user.Name
                 </td>
@@ -67,6 +69,8 @@
     </tbody>
 </table>
 
+<button type="button" @onclick="RemoveAsync">删除选中</button>
+
 
 @code{
     List<ApplicationUser> users;
@@ -74,6 +78,7 @@
     string newName = string.Empty;
     string newEmail = string.Empty;
     string newPassword = string.Empty;
+    List<string> selectedIds = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,6 +109,28 @@
             else
             {
                 users = context.Users.ToList();
+            }
+        }
+    }
+
+    async Task RemoveAsync()
+    {
+        using (var scope = services.CreateScope())
+        {
+            var userManager =
+                    scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var defaultUser = new ApplicationUser
+            {
+                Name = newName,
+                UserName = newEmail,
+                Email = newEmail,
+            };
+            foreach (var user in userManager.Users)
+            {
+                if (selectedIds.Contains(user.Id))
+                {
+                    await userManager.DeleteAsync(user);
+                }
             }
         }
     }

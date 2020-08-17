@@ -9,5 +9,7 @@ namespace ApolloWebUI.Model
     public class ApplicationUser: IdentityUser
     {
         public string Name { get; set; }
+
+        public List<UserProduct> UserProducts { get; set; }
     }
 }

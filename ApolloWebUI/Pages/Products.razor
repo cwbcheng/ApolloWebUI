@@ -1,0 +1,106 @@
+﻿@page "/products"
+@using Model
+@inject IOnDutyRepository repository
+
+<h1>Products</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>
+            </td>
+            <td>
+                proID
+            </td>
+            <td>
+                产品名称
+            </td>
+            <td>
+                状态
+            </td>
+            <td>
+                操作
+            </td>
+        </tr>
+    </thead>
+    @foreach (var item in ProductList)
+    {
+        <tbody>
+            <tr>
+                <td>
+                    <input type="checkbox" @onchange="@((ChangeEventArgs args)=> { if ((bool)args.Value == true) { selectedIds.Add(item.Id); } else {selectedIds.Remove(item.Id); } })" />
+                </td>
+                <td>
+                    @item.Id
+                </td>
+                <td>
+                    @item.ProductName
+                </td>
+                <td>
+                    @(item.IsDisable ? "禁用" : "启用")
+                </td>
+                <td>
+                    <button @onclick="@(async ()=> { var product = await repository.FindProductAsync(item.Id);
+        product.IsDisable = !product.IsDisable;
+        await repository.UpateProductAsync(product);
+            ProductList = (await repository.GetAllProdcutAsync()).ToList();})">@(item.IsDisable ? "启用" : "禁用")</button>
+                </td>
+            </tr>
+        </tbody>
+    }
+</table>
+<EditForm Model="@Product" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <p>
+        <label for="name">proID: </label>
+        <InputText id="name" @bind-Value="Product.Id" />
+    </p>
+    <p>
+        <label for="name">产品名称: </label>
+        <InputText id="email" @bind-Value="Product.ProductName" />
+    </p>
+    <button type="submit">增加</button>
+</EditForm>
+<button type="button" @onclick="RemoveAsync">删除选中</button>
+@code {
+    [Parameter]
+    public List<Product> ProductList { get; set; } = new List<Product>();
+    public EventCallback<List<ApplicationUser>> ProductListChanged { get; set; }
+    List<string> selectedIds = new List<string>();
+    private Product Product = new Product();
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await base.OnInitializedAsync();
+            ProductList = (await repository.GetAllProdcutAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    async Task RemoveAsync()
+    {
+        foreach (var item in selectedIds)
+        {
+            await repository.RemoveProductAsync(item);
+        }
+        ProductList = (await repository.GetAllProdcutAsync()).ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await repository.AddProductAsync(Product);
+            ProductList = (await repository.GetAllProdcutAsync()).ToList();
+            Product = new Product();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+}

@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using ApolloWebUI.Model;
+using Quartz;
+using Quartz.Impl;
 
 namespace ApolloWebUI
 {
@@ -51,13 +53,18 @@ namespace ApolloWebUI
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            services.AddScoped<IOnDutyRepository, OnDutyRepository>();
             services.AddBlazoredModal();
             services.AddScoped<ApolloService>();
             services.AddHttpContextAccessor();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+            services.AddSingleton<AlarmService>();
+            services.AddTransient<MyJob>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AlarmService alarmService)
         {
             if (env.IsDevelopment())
             {
@@ -69,6 +76,8 @@ namespace ApolloWebUI
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            alarmService.Run();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
