@@ -37,7 +37,6 @@ namespace ApolloWebUI.Model
         public void Dispose()
         {
             _onDutyContent?.Dispose();
-            Console.WriteLine(this.GetHashCode() + "释放");
         }
 
         public Task<Product> FindProductAsync(string id)
