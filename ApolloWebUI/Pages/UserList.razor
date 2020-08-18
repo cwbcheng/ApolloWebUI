@@ -11,7 +11,6 @@
 @using Microsoft.AspNetCore.Identity;
 
 @inject IModalService Modal;
-@inject AppDbContext context;
 @inject IServiceProvider services;
 
 <table ="table">
@@ -83,8 +82,9 @@
     protected override async Task OnInitializedAsync()
     {
         using (var scope = services.CreateScope())
+        using (var aContext = scope.ServiceProvider.GetService<AppDbContext>())
         {
-            users = context.Users.ToList();
+            users = aContext.Users.ToList();
         }
     }
 
@@ -108,7 +108,10 @@
             }
             else
             {
-                users = context.Users.ToList();
+                using (var aContext = scope.ServiceProvider.GetService<AppDbContext>())
+                {
+                    users = aContext.Users.ToList();
+                }
             }
         }
     }
