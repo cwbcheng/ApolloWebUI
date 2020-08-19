@@ -4,10 +4,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ApolloWebUI.Migrations
 {
-    public partial class InitUsers : Migration
+    public partial class InitAppDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AlarmRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProductId = table.Column<string>(maxLength: 20, nullable: true),
+                    Message = table.Column<string>(nullable: true),
+                    TraceId = table.Column<string>(nullable: true),
+                    ErrorCode = table.Column<int>(nullable: false),
+                    Time = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AlarmRecords", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -52,7 +69,7 @@ namespace ApolloWebUI.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 20, nullable: false),
                     ProductName = table.Column<string>(maxLength: 20, nullable: false),
                     IsDisable = table.Column<bool>(nullable: false)
                 },
@@ -236,6 +253,9 @@ namespace ApolloWebUI.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AlarmRecords");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApolloWebUI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200817071152_InitUsers")]
-    partial class InitUsers
+    [Migration("20200819030851_InitAppDb")]
+    partial class InitAppDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -18,6 +18,33 @@ namespace ApolloWebUI.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("ApolloWebUI.Model.AlarmRecordModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ErrorCode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("ProductId")
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasMaxLength(20);
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TraceId")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AlarmRecords");
+                });
 
             modelBuilder.Entity("ApolloWebUI.Model.ApplicationUser", b =>
                 {
@@ -89,7 +116,8 @@ namespace ApolloWebUI.Migrations
             modelBuilder.Entity("ApolloWebUI.Model.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasMaxLength(20);
 
                     b.Property<bool>("IsDisable")
                         .HasColumnType("tinyint(1)");
@@ -110,7 +138,7 @@ namespace ApolloWebUI.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<string>("ProductId")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4");
 
                     b.HasKey("UserId", "ProductId");
 

@@ -11,6 +11,7 @@ namespace ApolloWebUI.Model
     public class Product
     {
         [Key]
+        [MaxLength(20)]
         public string Id { get; set; }
 
         [MaxLength(20)]
