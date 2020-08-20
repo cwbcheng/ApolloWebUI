@@ -64,7 +64,7 @@ namespace ApolloWebUI.Data
                             }
                             catch (Exception ex)
                             {
-                                ;
+                                Console.WriteLine(ex);
                             }
                             if (records.Count > 0)
                             {

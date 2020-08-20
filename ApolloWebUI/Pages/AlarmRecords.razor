@@ -1,0 +1,96 @@
+﻿@page "/AlarmRecords"
+@attribute [Authorize]
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using System.Text.Json
+@using ApolloWebUI.Model
+@using ApolloWebUI.Components
+@using ApolloWebUI.Data
+@using Microsoft.EntityFrameworkCore;
+@using Microsoft.Extensions.DependencyInjection;
+
+@inject IModalService Modal;
+@inject IServiceProvider services;
+@inject IJSRuntime JSRuntime;
+
+
+
+<h1>AlarmRecords</h1>
+
+<input type="date" id="selectTime" @bind-value="@SelectedDate"/>
+<input type="button" @onclick="@Search" value="查询"/>
+<table class="table">
+    <tbody>
+        @foreach (var record in Records)
+        {
+            <tr>
+                <td>@record.Time</td>
+                <td>@record.ProductId</td>
+                <td>@GetProductName(record.ProductId)</td>
+                <td>@record.ErrorCode</td>
+                <td>@record.Message</td>
+                <td><a href="https://www.chengangni.com/callChainParser/@record.TraceId">@record.TraceId</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<AlarmRecordModel> Records { get; set; } = new List<AlarmRecordModel>();
+    private List<Product> Products = new List<Product>();
+    private DateTime SelectedDate { get; set; } = DateTime.Now;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            using (var scope = services.CreateScope())
+            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
+            {
+                var now = DateTime.Now;
+                Records = await context.AlarmRecords
+                    .Where(r => r.Time.Year == now.Year && r.Time.Month == now.Month && r.Time.Date == now.Date)
+                    .ToListAsync();
+                Products = await context.Products.ToListAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private string GetProductName(string proId)
+    {
+        var p = Products.FirstOrDefault(p => p.Id == proId);
+        if (p != null)
+        {
+            return p.ProductName;
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    private async Task Search()
+    {
+        try
+        {
+            using (var scope = services.CreateScope())
+            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
+            {
+                var now = SelectedDate;
+                Records = await context.AlarmRecords
+                    .Where(r => r.Time.Year == now.Year && r.Time.Month == now.Month && r.Time.Date == now.Date)
+                    .ToListAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+}
