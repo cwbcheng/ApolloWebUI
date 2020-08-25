@@ -21,10 +21,13 @@ namespace ApolloWebUI.Data
         private readonly IServiceProvider serviceProvider;
         private SmtpEmailHelper emailHelper;
 
-        public MyJob(IConfiguration configuration, IServiceProvider serviceProvider)
+        public HolidaySearchService HolidaySearchService { get; }
+
+        public MyJob(IConfiguration configuration, IServiceProvider serviceProvider, HolidaySearchService holidaySearchService)
         {
             this.configuration = configuration;
             this.serviceProvider = serviceProvider;
+            HolidaySearchService = holidaySearchService;
             string host = configuration.GetSection("EmailHost").Value;
             string emailUserName = configuration.GetSection("EmailUserName").Value;
             string emailPassword = configuration.GetSection("EmailPassword").Value;
@@ -43,6 +46,11 @@ namespace ApolloWebUI.Data
                 {
                     var users = await onDutyRepository.GetAllUsersAsync();
                     var products = await onDutyRepository.GetAllProdcutAsync();
+                    var isWorkdayResult = await HolidaySearchService.CheckIsWorkday(DateTime.Now);
+                    if (isWorkdayResult.success && isWorkdayResult.result == false)
+                    {
+                        products = products.Where(o => o.IsHolidayDisable == false);
+                    }
                     var request = BuildRequestBody(time, products);
                     StringContent content = new StringContent(request, Encoding.UTF8, "application/json");
                     var response = await httpClient.PostAsync($"{configuration.GetSection("callChainUrl").Value}error/", content);

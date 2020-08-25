@@ -38,13 +38,22 @@
                     @item.ProductName
                 </td>
                 <td>
-                    @(item.IsDisable ? "禁用" : "启用")
+                    @(item.IsDisable ? "禁用" : "启用") |
+                    @(item.IsHolidayDisable ? "节假日禁用" : "节假日启用")
                 </td>
                 <td>
                     <button @onclick="@(async ()=> { var product = await repository.FindProductAsync(item.Id);
         product.IsDisable = !product.IsDisable;
         await repository.UpateProductAsync(product);
-            ProductList = (await repository.GetAllProdcutAsync()).ToList();})">@(item.IsDisable ? "启用" : "禁用")</button>
+            ProductList = (await repository.GetAllProdcutAsync()).ToList();})">
+                        @(item.IsDisable ? "启用" : "禁用")
+                    </button>
+                    <button @onclick="@(async ()=> { var product = await repository.FindProductAsync(item.Id);
+        product.IsHolidayDisable = !product.IsHolidayDisable;
+        await repository.UpateProductAsync(product);
+            ProductList = (await repository.GetAllProdcutAsync()).ToList();})">
+                        @(item.IsHolidayDisable ? "节假日启用" : "节假日禁用")
+                    </button>
                 </td>
             </tr>
         </tbody>

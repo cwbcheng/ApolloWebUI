@@ -21,5 +21,7 @@ namespace ApolloWebUI.Model
         public bool IsDisable { get; set; }
 
         public List<UserProduct> UserProducts { get; set; }
+
+        public bool IsHolidayDisable { get; set; }
     }
 }

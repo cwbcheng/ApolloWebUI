@@ -61,6 +61,7 @@ namespace ApolloWebUI
 
             services.AddSingleton<AlarmService>();
             services.AddTransient<MyJob>();
+            services.AddSingleton<HolidaySearchService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
