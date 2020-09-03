@@ -18,14 +18,16 @@ namespace ApolloWebUI.Data
         private IScheduler _scheduler;
         private IServiceProvider _serviceProvider;
 
-        public AlarmService(ISchedulerFactory schedulerFactory, IServiceProvider serviceProvider)
+        public AlarmService(ISchedulerFactory schedulerFactory, IServiceProvider serviceProvider,IConfiguration configuration)
         {
             _schedulerFactory = schedulerFactory;
             _serviceProvider = serviceProvider;
+            Configuration = configuration;
         }
 
         public bool IsRunning { get; set; }
         public string ErrorMessage { get; set; }
+        public IConfiguration Configuration { get; }
 
         public async Task Run()
         {
@@ -36,8 +38,15 @@ namespace ApolloWebUI.Data
                 //2、开启调度器
                 await _scheduler.Start();
                 //3、创建一个触发器
+                var start = Configuration["emailTime:start"];
+                var startTime = new TimeOfDay(int.Parse(start.Split(':')[0]), int.Parse(start.Split(':')[1]));
+
+                var stop = Configuration["emailTime:stop"];
+                var stopTime = new TimeOfDay(int.Parse(stop.Split(':')[0]), int.Parse(stop.Split(':')[1]));
+
                 var trigger = TriggerBuilder.Create()
-                                .WithSimpleSchedule(x => x.WithIntervalInMinutes(1).RepeatForever())//每一分钟执行一次
+                                .WithDailyTimeIntervalSchedule(x=>x.StartingDailyAt(startTime).EndingDailyAt(stopTime).WithIntervalInMinutes(1))
+                                //.WithSimpleSchedule(x => x. x.WithIntervalInMinutes(1).RepeatForever())//每一分钟执行一次
                                 .Build();
                 //4、创建任务
                 var jobDetail = JobBuilder.Create<MyJob>()
