@@ -1,0 +1,63 @@
+﻿@page "/Cookies"
+@attribute [Authorize]
+@using Blazored
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using System.Text.Json
+@using ApolloWebUI.Model
+@using ApolloWebUI.Components
+@using ApolloWebUI.Data
+@using Microsoft.EntityFrameworkCore;
+@using Microsoft.Extensions.DependencyInjection;
+@using Microsoft.Extensions.Configuration;
+
+@inject IModalService Modal;
+@inject IJSRuntime JSRuntime;
+@inject IConfiguration Configuration
+
+
+
+<h1>Cookies</h1>
+
+<table class="table">
+    <tbody>
+        @foreach (var record in Records)
+        {
+            <tr>
+                <td>@record.Key</td>
+                <td>@record.Value</td>
+            </tr>
+        }
+    </tbody>
+    @message
+</table>
+
+@code {
+    [Parameter]
+    public List<KeyValuePair<string, string>> Records { get; set; } = new List<KeyValuePair<string, string>>();
+    static HttpClient HttpClient = new HttpClient();
+    string message;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        message = string.Empty;
+        try
+        {
+            var url = Configuration["cookies:url"];
+            var response = await HttpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                Records = JsonSerializer.Deserialize<List<KeyValuePair<string, string>>>(result);
+            }
+            else
+            {
+                message = "网络请求失败：" + response.StatusCode.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            message = ex.ToString();
+        }
+    }
+}
