@@ -129,7 +129,7 @@ namespace ApolloWebUI.Data
             {
                 var product = products.SingleOrDefault(p => p.Id == item.ProductId);
                 var proName = product == null ? string.Empty : product.ProductName;
-                sb.Append($"<tr><td>{item.ProductId}</td><td>{proName}</td><td>{item.ErrorCode}</td><td>{item.Message}</td><td><a href='{"https://www.chengangni.com/callChainParser/"}{item.TraceId}'>{item.TraceId}</a></td></tr>");
+                sb.Append($"<tr><td>{item.ProductId}</td><td>{proName}</td><td>{item.ErrorCode}</td><td>{item.Message}</td><td><a href='{"http://47.104.13.151:5000/callChainParser/"}{item.TraceId}'>{item.TraceId}</a></td></tr>");
             }
             sb.Append("</tbody>");
             sb.Append("</table>");
@@ -234,7 +234,7 @@ namespace ApolloWebUI.Data
                         return null;
                     }
 
-                    sb.Append($"<tr><td>{proId}</td><td>{proName}</td><td>{code}</td><td>{message}</td><td><a href='{"https://www.chengangni.com/callChainParser/"}{traceId}'>{traceId}</a></td></tr>");
+                    sb.Append($"<tr><td>{proId}</td><td>{proName}</td><td>{code}</td><td>{message}</td><td><a href='{"http://47.104.13.151:5000/callChainParser/"}{traceId}'>{traceId}</a></td></tr>");
                 }
                 sb.Append("</tbody>");
                 sb.Append("</table>");
